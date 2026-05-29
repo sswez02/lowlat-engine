@@ -34,7 +34,8 @@ FetchContent_Declare(
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googletest)
 
+add_subdirectory(tests)
+
 # add_subdirectory(engine)
 # add_subdirectory(pipelines)
-# add_subdirectory(tests)
 # add_subdirectory(benchmarks)
