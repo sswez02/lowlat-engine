@@ -45,6 +45,7 @@ set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
 FetchContent_MakeAvailable(googlebenchmark)
 
 add_subdirectory(tests)
+add_subdirectory(benchmarks)
 
 # add_subdirectory(engine)
 # add_subdirectory(pipelines)
