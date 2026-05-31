@@ -1,9 +1,11 @@
 add_executable(engine_bench
     bench_smoke.cpp
+    bench_operator.cpp
 )
 
 target_link_libraries(engine_bench
     PRIVATE
+        engine
         benchmark::benchmark
         benchmark::benchmark_main
 )
