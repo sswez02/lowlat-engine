@@ -10,7 +10,7 @@ class Operator {
   public:
     virtual ~Operator() = default;
     virtual void process(int input) = 0;
-    virtual std::string name() const = 0;
+    [[nodiscard]] virtual std::string name() const = 0;
 };
 
 class NoOpOperator final : public Operator {
@@ -18,11 +18,12 @@ class NoOpOperator final : public Operator {
     void process(int input) override {
         last_value_ = input;
     }
-    std::string name() const override {
+
+    [[nodiscard]] std::string name() const override {
         return "NoOp";
     }
 
-    int last_value() const {
+    [[nodiscard]] int last_value() const {
         return last_value_;
     }
 

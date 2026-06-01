@@ -7,7 +7,7 @@
 static void BM_DirectCall(benchmark::State &state) {
     engine::NoOpOperator op;
     int input = 0;
-    for (auto _ : state) {
+    for ([[maybe_unused]] auto _ : state) {
         op.process(input);
         benchmark::DoNotOptimize(op.last_value());
         ++input;
@@ -20,7 +20,7 @@ BENCHMARK(BM_DirectCall);
 static void BM_VirtualDispatch(benchmark::State &state) {
     std::unique_ptr<engine::Operator> op = std::make_unique<engine::NoOpOperator>();
     int input = 0;
-    for (auto _ : state) {
+    for ([[maybe_unused]] auto _ : state) {
         op->process(input);
         benchmark::DoNotOptimize(op.get());
         ++input;
