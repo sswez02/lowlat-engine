@@ -1,5 +1,7 @@
 # lowlat-engine
 
+[![CI](https://github.com/sswez02/lowlat-engine/actions/workflows/ci.yml/badge.svg)](https://github.com/sswez02/lowlat-engine/actions/workflows/ci.yml)
+
 A generic low-latency C++20 event/stream processing engine.
 
 ## Architecture
