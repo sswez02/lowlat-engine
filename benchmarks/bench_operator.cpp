@@ -1,6 +1,8 @@
 #include <benchmark/benchmark.h>
 #include <engine/operator.h>
+
 #include <memory>
+#include <vector>
 
 // Direct call on the real NoOpOperator type.
 // This is the baseline before measuring virtual dispatch.
@@ -27,3 +29,19 @@ static void BM_VirtualDispatch(benchmark::State &state) {
     }
 }
 BENCHMARK(BM_VirtualDispatch);
+
+// Switches between two concrete operator types.
+// This prevents the compiler from proving one fixed dynamic type.
+static void BM_VirtualDispatchPolymorphic(benchmark::State &state) {
+    std::vector<std::unique_ptr<engine::Operator>> ops;
+    ops.push_back(std::make_unique<engine::NoOpOperator>());
+    ops.push_back(std::make_unique<engine::IncrementOperator>());
+
+    int input = 0;
+    for ([[maybe_unused]] auto _ : state) {
+        ops[input & 1]->process(input);
+        benchmark::DoNotOptimize(ops.data());
+        ++input;
+    }
+}
+BENCHMARK(BM_VirtualDispatchPolymorphic);

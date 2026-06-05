@@ -31,4 +31,22 @@ class NoOpOperator final : public Operator {
     int last_value_ = 0;
 };
 
+class IncrementOperator final : public Operator {
+  public:
+    void process(int input) override {
+        sum_ += input;
+    }
+
+    [[nodiscard]] std::string name() const override {
+        return "Increment";
+    }
+
+    [[nodiscard]] int sum() const {
+        return sum_;
+    }
+
+  private:
+    int sum_ = 0;
+};
+
 } // namespace engine

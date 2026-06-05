@@ -17,3 +17,12 @@ TEST(Operator, VirtualDispatchThroughBasePointer) {
     ASSERT_NE(noop, nullptr);
     EXPECT_EQ(noop->last_value(), 7);
 }
+
+TEST(Operator, IncrementOperatorAccumulatesInput) {
+    engine::IncrementOperator op;
+    op.process(2);
+    op.process(3);
+
+    EXPECT_EQ(op.name(), "Increment");
+    EXPECT_EQ(op.sum(), 5);
+}
