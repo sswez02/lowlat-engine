@@ -37,7 +37,7 @@ class NoOpOperator final : public Operator {
     }
 
   private:
-    Event last_event_{};
+    Event last_event_;
 };
 
 class IncrementOperator final : public Operator {

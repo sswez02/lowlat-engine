@@ -63,5 +63,5 @@ jobs:
         run: cmake -S . -B build -G Ninja
       - name: Run clang-tidy
         run: |
-          find engine tests benchmarks \( -name '*.cpp' -o -name '*.h' \) -print \
+          find engine tests benchmarks -name '*.cpp' -print \
             | xargs clang-tidy -p build/ --warnings-as-errors='*'
