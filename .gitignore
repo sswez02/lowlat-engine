@@ -31,3 +31,4 @@ data.*
 # Local benchmark output
 *.flamegraph
 perf.data*
+benchmark-results/
