@@ -7,18 +7,19 @@
 namespace engine {
 
 struct TickEvent {
-    uint64_t timestamp = 0;
-    int64_t price = 0;
+    uint64_t timestamp{};
+    int64_t price{};
+    int64_t volume{};
 };
 
 struct AudioSample {
-    uint64_t timestamp = 0;
-    int16_t amplitude = 0;
+    uint64_t timestamp{};
+    int16_t amplitude{};
 };
 
 struct IMUSample {
-    uint64_t timestamp = 0;
-    float acceleration = 0;
+    uint64_t timestamp{};
+    float acceleration{};
 };
 
 static_assert(std::is_trivially_copyable_v<TickEvent>);
