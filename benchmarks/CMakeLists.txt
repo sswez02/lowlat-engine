@@ -1,6 +1,7 @@
 add_executable(engine_bench
     bench_smoke.cpp
     bench_operator.cpp
+    bench_pipeline.cpp
 )
 
 target_link_libraries(engine_bench
