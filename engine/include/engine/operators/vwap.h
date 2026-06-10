@@ -9,6 +9,8 @@
 
 namespace engine {
 
+__extension__ using int128_t = __int128;
+
 class VWAPOperator final : public Operator {
   public:
     void process(const Event &event) override {
@@ -18,11 +20,11 @@ class VWAPOperator final : public Operator {
                                return;
                            }
 
-                           sum_pv_ += static_cast<__int128>(tick.price) *
-                                      static_cast<__int128>(tick.volume);
+                           sum_pv_ += static_cast<int128_t>(tick.price) *
+                                      static_cast<int128_t>(tick.volume);
                            sum_v_ += static_cast<uint64_t>(tick.volume);
                        },
-                       [](auto &&) {} // ignore non-tick events
+                       [](const auto &) {}, // ignore non-tick events
                    },
                    event);
     }
@@ -36,8 +38,8 @@ class VWAPOperator final : public Operator {
     }
 
   private:
-    __int128 sum_pv_ = 0; // accumulated price * volume
-    uint64_t sum_v_ = 0;  // accumulated volume
+    int128_t sum_pv_ = 0; // accumulated price * volume
+    uint64_t sum_v_ = 0;  // accumulated positive volume
 };
 
 } // namespace engine
