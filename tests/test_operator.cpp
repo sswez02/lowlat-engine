@@ -16,7 +16,7 @@ TEST(Operator, NoOpStoresTickEvent) {
     engine::NoOpOperator op;
 
     op.process(engine::TickEvent{
-        .timestamp = 1,
+        .timestamp = 1U,
         .price = 42,
     });
 
@@ -24,7 +24,7 @@ TEST(Operator, NoOpStoresTickEvent) {
 
     const auto *stored_tick = std::get_if<engine::TickEvent>(&op.last_event());
     ASSERT_NE(stored_tick, nullptr);
-    EXPECT_EQ(stored_tick->timestamp, 1);
+    EXPECT_EQ(stored_tick->timestamp, 1U);
     EXPECT_EQ(stored_tick->price, 42);
 }
 
@@ -32,7 +32,7 @@ TEST(Operator, NoOpStoresAudioSample) {
     engine::NoOpOperator op;
 
     op.process(engine::AudioSample{
-        .timestamp = 2,
+        .timestamp = 2U,
         .amplitude = 7,
     });
 
@@ -40,7 +40,7 @@ TEST(Operator, NoOpStoresAudioSample) {
 
     const auto *stored_audio = std::get_if<engine::AudioSample>(&op.last_event());
     ASSERT_NE(stored_audio, nullptr);
-    EXPECT_EQ(stored_audio->timestamp, 2);
+    EXPECT_EQ(stored_audio->timestamp, 2U);
     EXPECT_EQ(stored_audio->amplitude, 7);
 }
 
@@ -48,7 +48,7 @@ TEST(Operator, NoOpStoresIMUSample) {
     engine::NoOpOperator op;
 
     op.process(engine::IMUSample{
-        .timestamp = 3,
+        .timestamp = 3U,
         .acceleration = 9.5F,
     });
 
@@ -56,7 +56,7 @@ TEST(Operator, NoOpStoresIMUSample) {
 
     const auto *stored_imu = std::get_if<engine::IMUSample>(&op.last_event());
     ASSERT_NE(stored_imu, nullptr);
-    EXPECT_EQ(stored_imu->timestamp, 3);
+    EXPECT_EQ(stored_imu->timestamp, 3U);
     EXPECT_FLOAT_EQ(stored_imu->acceleration, 9.5F);
 }
 
@@ -64,7 +64,7 @@ TEST(Operator, NoOpStoresMonostateEvent) {
     engine::NoOpOperator op;
 
     op.process(engine::TickEvent{
-        .timestamp = 1,
+        .timestamp = 1U,
         .price = 42,
     });
 
@@ -79,12 +79,12 @@ TEST(Operator, NoOpStoresMostRecentEvent) {
     engine::NoOpOperator op;
 
     op.process(engine::TickEvent{
-        .timestamp = 1,
+        .timestamp = 1U,
         .price = 42,
     });
 
     op.process(engine::AudioSample{
-        .timestamp = 2,
+        .timestamp = 2U,
         .amplitude = 7,
     });
 
@@ -92,7 +92,7 @@ TEST(Operator, NoOpStoresMostRecentEvent) {
 
     const auto *stored_audio = std::get_if<engine::AudioSample>(&op.last_event());
     ASSERT_NE(stored_audio, nullptr);
-    EXPECT_EQ(stored_audio->timestamp, 2);
+    EXPECT_EQ(stored_audio->timestamp, 2U);
     EXPECT_EQ(stored_audio->amplitude, 7);
 }
 
@@ -111,7 +111,7 @@ TEST(Operator, IncrementOperatorCountsTickEvent) {
     engine::IncrementOperator op;
 
     op.process(engine::TickEvent{
-        .timestamp = 1,
+        .timestamp = 1U,
         .price = 42,
     });
 
@@ -125,7 +125,7 @@ TEST(Operator, IncrementOperatorCountsAudioSample) {
     engine::IncrementOperator op;
 
     op.process(engine::AudioSample{
-        .timestamp = 2,
+        .timestamp = 2U,
         .amplitude = 7,
     });
 
@@ -139,7 +139,7 @@ TEST(Operator, IncrementOperatorCountsIMUSample) {
     engine::IncrementOperator op;
 
     op.process(engine::IMUSample{
-        .timestamp = 3,
+        .timestamp = 3U,
         .acceleration = 9.5F,
     });
 
@@ -164,17 +164,17 @@ TEST(Operator, IncrementOperatorCountsMixedSequence) {
     engine::IncrementOperator op;
 
     op.process(engine::TickEvent{
-        .timestamp = 1,
+        .timestamp = 1U,
         .price = 42,
     });
 
     op.process(engine::AudioSample{
-        .timestamp = 2,
+        .timestamp = 2U,
         .amplitude = 7,
     });
 
     op.process(engine::IMUSample{
-        .timestamp = 3,
+        .timestamp = 3U,
         .acceleration = 9.5F,
     });
 
@@ -208,7 +208,7 @@ TEST(Operator, VirtualDispatchThroughBasePointer) {
     std::unique_ptr<engine::Operator> op = std::make_unique<engine::NoOpOperator>();
 
     op->process(engine::TickEvent{
-        .timestamp = 1,
+        .timestamp = 1U,
         .price = 42,
     });
 
@@ -221,6 +221,6 @@ TEST(Operator, VirtualDispatchThroughBasePointer) {
 
     const auto *stored_tick = std::get_if<engine::TickEvent>(&noop->last_event());
     ASSERT_NE(stored_tick, nullptr);
-    EXPECT_EQ(stored_tick->timestamp, 1);
+    EXPECT_EQ(stored_tick->timestamp, 1U);
     EXPECT_EQ(stored_tick->price, 42);
 }

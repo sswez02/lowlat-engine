@@ -14,17 +14,17 @@ TEST(Pipeline, EmptyPipelineDoesNotCrash) {
     EXPECT_NO_THROW(pipeline.process(engine::Event{}));
 
     EXPECT_NO_THROW(pipeline.process(engine::TickEvent{
-        .timestamp = 1,
+        .timestamp = 1U,
         .price = 42,
     }));
 
     EXPECT_NO_THROW(pipeline.process(engine::AudioSample{
-        .timestamp = 2,
+        .timestamp = 2U,
         .amplitude = 7,
     }));
 
     EXPECT_NO_THROW(pipeline.process(engine::IMUSample{
-        .timestamp = 3,
+        .timestamp = 3U,
         .acceleration = 9.5F,
     }));
 }
@@ -51,7 +51,7 @@ TEST(Pipeline, SingleOperatorReceivesEvent) {
     pipeline.add(std::move(noop));
 
     const engine::Event event = engine::TickEvent{
-        .timestamp = 1,
+        .timestamp = 1U,
         .price = 42,
     };
 
@@ -61,7 +61,7 @@ TEST(Pipeline, SingleOperatorReceivesEvent) {
 
     const auto &stored_event = std::get<engine::TickEvent>(noop_ptr->last_event());
 
-    EXPECT_EQ(stored_event.timestamp, 1);
+    EXPECT_EQ(stored_event.timestamp, 1U);
     EXPECT_EQ(stored_event.price, 42);
 }
 
@@ -80,7 +80,7 @@ TEST(Pipeline, MultipleOperatorsAllReceiveEvent) {
     pipeline.add(std::move(noop3));
 
     const engine::Event event = engine::TickEvent{
-        .timestamp = 1,
+        .timestamp = 1U,
         .price = 42,
     };
 
@@ -88,17 +88,17 @@ TEST(Pipeline, MultipleOperatorsAllReceiveEvent) {
 
     ASSERT_TRUE(std::holds_alternative<engine::TickEvent>(noop_ptr1->last_event()));
     const auto &stored_event1 = std::get<engine::TickEvent>(noop_ptr1->last_event());
-    EXPECT_EQ(stored_event1.timestamp, 1);
+    EXPECT_EQ(stored_event1.timestamp, 1U);
     EXPECT_EQ(stored_event1.price, 42);
 
     ASSERT_TRUE(std::holds_alternative<engine::TickEvent>(noop_ptr2->last_event()));
     const auto &stored_event2 = std::get<engine::TickEvent>(noop_ptr2->last_event());
-    EXPECT_EQ(stored_event2.timestamp, 1);
+    EXPECT_EQ(stored_event2.timestamp, 1U);
     EXPECT_EQ(stored_event2.price, 42);
 
     ASSERT_TRUE(std::holds_alternative<engine::TickEvent>(noop_ptr3->last_event()));
     const auto &stored_event3 = std::get<engine::TickEvent>(noop_ptr3->last_event());
-    EXPECT_EQ(stored_event3.timestamp, 1);
+    EXPECT_EQ(stored_event3.timestamp, 1U);
     EXPECT_EQ(stored_event3.price, 42);
 }
 
@@ -119,17 +119,17 @@ TEST(Pipeline, HeterogeneousOperators) {
     pipeline.add(std::move(noop2));
 
     pipeline.process(engine::TickEvent{
-        .timestamp = 1,
+        .timestamp = 1U,
         .price = 42,
     });
 
     pipeline.process(engine::AudioSample{
-        .timestamp = 2,
+        .timestamp = 2U,
         .amplitude = 7,
     });
 
     pipeline.process(engine::IMUSample{
-        .timestamp = 3,
+        .timestamp = 3U,
         .acceleration = 9.5F,
     });
 
@@ -144,10 +144,10 @@ TEST(Pipeline, HeterogeneousOperators) {
     const auto &stored_event1 = std::get<engine::IMUSample>(noop_ptr1->last_event());
     const auto &stored_event2 = std::get<engine::IMUSample>(noop_ptr2->last_event());
 
-    EXPECT_EQ(stored_event1.timestamp, 3);
+    EXPECT_EQ(stored_event1.timestamp, 3U);
     EXPECT_FLOAT_EQ(stored_event1.acceleration, 9.5F);
 
-    EXPECT_EQ(stored_event2.timestamp, 3);
+    EXPECT_EQ(stored_event2.timestamp, 3U);
     EXPECT_FLOAT_EQ(stored_event2.acceleration, 9.5F);
 }
 
@@ -160,17 +160,17 @@ TEST(Pipeline, PipelineProcessesAllEventTypes) {
     pipeline.add(std::move(increment));
 
     pipeline.process(engine::TickEvent{
-        .timestamp = 1,
+        .timestamp = 1U,
         .price = 42,
     });
 
     pipeline.process(engine::AudioSample{
-        .timestamp = 2,
+        .timestamp = 2U,
         .amplitude = 7,
     });
 
     pipeline.process(engine::IMUSample{
-        .timestamp = 3,
+        .timestamp = 3U,
         .acceleration = 9.5F,
     });
 
