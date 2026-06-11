@@ -48,22 +48,28 @@ static void write_be64(std::vector<uint8_t> &out, uint64_t value) {
     out.push_back(static_cast<uint8_t>(value & 0xFF));
 }
 
+struct OEPMessageInput {
+    uint64_t timestamp;
+    uint32_t price;
+    uint32_t shares;
+    char printable;
+};
+
 // Makes a test OEP message.
-static std::vector<uint8_t> make_oep_message(uint64_t timestamp, uint32_t price, uint32_t shares,
-                                             char printable) {
+static std::vector<uint8_t> make_oep_message(const OEPMessageInput &input) {
     std::vector<uint8_t> out;
 
     write_be16(out, 36); // 2-byte length prefix
     out.push_back(static_cast<uint8_t>('C'));
 
-    write_be16(out, 1);         // stock_locate
-    write_be16(out, 1);         // tracking
-    write_be48(out, timestamp); // timestamp
-    write_be64(out, 123);       // order_ref
-    write_be32(out, shares);    // executed_shares
-    write_be64(out, 456);       // match_number
-    out.push_back(static_cast<uint8_t>(printable));
-    write_be32(out, price); // execution_price
+    write_be16(out, 1);               // stock_locate
+    write_be16(out, 1);               // tracking
+    write_be48(out, input.timestamp); // timestamp
+    write_be64(out, 123);             // order_ref
+    write_be32(out, input.shares);    // executed_shares
+    write_be64(out, 456);             // match_number
+    out.push_back(static_cast<uint8_t>(input.printable));
+    write_be32(out, input.price); // execution_price
 
     EXPECT_EQ(out.size(), 38U);
     return out;
@@ -87,7 +93,12 @@ static void append_bytes(std::vector<uint8_t> &dst, const std::vector<uint8_t> &
 }
 
 TEST(ITCHFileSource, OneOEPProducesOneTick) {
-    const auto bytes = make_oep_message(123U, 42U, 10U, 'Y');
+    const auto bytes = make_oep_message({
+        .timestamp = 123U,
+        .price = 42U,
+        .shares = 10U,
+        .printable = 'Y',
+    });
     const auto path = write_temp_file("OneOEPProducesOneTick", bytes);
 
     engine::Pipeline pipeline;
@@ -116,7 +127,12 @@ TEST(ITCHFileSource, OneOEPProducesOneTick) {
 }
 
 TEST(ITCHFileSource, NonPrintableOEPSkipped) {
-    const auto bytes = make_oep_message(123U, 42U, 10U, 'N');
+    const auto bytes = make_oep_message({
+        .timestamp = 123U,
+        .price = 42U,
+        .shares = 10U,
+        .printable = 'N',
+    });
     const auto path = write_temp_file("NonPrintableOEPSkipped", bytes);
 
     engine::Pipeline pipeline;
@@ -134,9 +150,24 @@ TEST(ITCHFileSource, NonPrintableOEPSkipped) {
 TEST(ITCHFileSource, MultipleOEPsAllProcessed) {
     std::vector<uint8_t> bytes;
 
-    append_bytes(bytes, make_oep_message(100U, 10U, 1U, 'Y'));
-    append_bytes(bytes, make_oep_message(200U, 20U, 2U, 'Y'));
-    append_bytes(bytes, make_oep_message(300U, 30U, 3U, 'Y'));
+    append_bytes(bytes, make_oep_message({
+                            .timestamp = 100U,
+                            .price = 10U,
+                            .shares = 1U,
+                            .printable = 'Y',
+                        }));
+    append_bytes(bytes, make_oep_message({
+                            .timestamp = 200U,
+                            .price = 20U,
+                            .shares = 2U,
+                            .printable = 'Y',
+                        }));
+    append_bytes(bytes, make_oep_message({
+                            .timestamp = 300U,
+                            .price = 30U,
+                            .shares = 3U,
+                            .printable = 'Y',
+                        }));
 
     const auto path = write_temp_file("MultipleOEPsAllProcessed", bytes);
 
@@ -182,8 +213,18 @@ TEST(ITCHFileSource, EmptyFileEmitsNoTicks) {
 TEST(ITCHFileSource, EndToEndWithVWAP) {
     std::vector<uint8_t> bytes;
 
-    append_bytes(bytes, make_oep_message(100U, 100U, 1U, 'Y'));
-    append_bytes(bytes, make_oep_message(200U, 200U, 3U, 'Y'));
+    append_bytes(bytes, make_oep_message({
+                            .timestamp = 100U,
+                            .price = 100U,
+                            .shares = 1U,
+                            .printable = 'Y',
+                        }));
+    append_bytes(bytes, make_oep_message({
+                            .timestamp = 200U,
+                            .price = 200U,
+                            .shares = 3U,
+                            .printable = 'Y',
+                        }));
 
     const auto path = write_temp_file("EndToEndWithVWAP", bytes);
 

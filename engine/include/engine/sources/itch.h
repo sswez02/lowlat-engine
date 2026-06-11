@@ -22,22 +22,25 @@ namespace itch_detail {
 // Big-endian byte readers.
 
 inline uint16_t read_be16(const uint8_t *p) {
-    return (uint16_t(p[0]) << 8) | uint16_t(p[1]);
+    return static_cast<uint16_t>((static_cast<uint32_t>(p[0]) << 8U) | static_cast<uint32_t>(p[1]));
 }
 
 inline uint32_t read_be32(const uint8_t *p) {
-    return (uint32_t(p[0]) << 24) | (uint32_t(p[1]) << 16) | (uint32_t(p[2]) << 8) | uint32_t(p[3]);
+    return (static_cast<uint32_t>(p[0]) << 24U) | (static_cast<uint32_t>(p[1]) << 16U) |
+           (static_cast<uint32_t>(p[2]) << 8U) | static_cast<uint32_t>(p[3]);
 }
 
 inline uint64_t read_be48(const uint8_t *p) {
-    return (uint64_t(p[0]) << 40) | (uint64_t(p[1]) << 32) | (uint64_t(p[2]) << 24) |
-           (uint64_t(p[3]) << 16) | (uint64_t(p[4]) << 8) | uint64_t(p[5]);
+    return (static_cast<uint64_t>(p[0]) << 40U) | (static_cast<uint64_t>(p[1]) << 32U) |
+           (static_cast<uint64_t>(p[2]) << 24U) | (static_cast<uint64_t>(p[3]) << 16U) |
+           (static_cast<uint64_t>(p[4]) << 8U) | static_cast<uint64_t>(p[5]);
 }
 
 inline uint64_t read_be64(const uint8_t *p) {
-    return (uint64_t(p[0]) << 56) | (uint64_t(p[1]) << 48) | (uint64_t(p[2]) << 40) |
-           (uint64_t(p[3]) << 32) | (uint64_t(p[4]) << 24) | (uint64_t(p[5]) << 16) |
-           (uint64_t(p[6]) << 8) | uint64_t(p[7]);
+    return (static_cast<uint64_t>(p[0]) << 56U) | (static_cast<uint64_t>(p[1]) << 48U) |
+           (static_cast<uint64_t>(p[2]) << 40U) | (static_cast<uint64_t>(p[3]) << 32U) |
+           (static_cast<uint64_t>(p[4]) << 24U) | (static_cast<uint64_t>(p[5]) << 16U) |
+           (static_cast<uint64_t>(p[6]) << 8U) | static_cast<uint64_t>(p[7]);
 }
 
 } // namespace itch_detail
