@@ -61,14 +61,14 @@ struct OrderExecutedWithPrice {
 
 inline OrderExecutedWithPrice parse_order_executed_with_price(const uint8_t *p) {
     OrderExecutedWithPrice oep;
-    oep.message_type = p[0];
+    oep.message_type = static_cast<char>(p[0]);
     oep.stock_locate = itch_detail::read_be16(p + 1);
     oep.tracking = itch_detail::read_be16(p + 3);
     oep.timestamp = itch_detail::read_be48(p + 5);
     oep.order_ref = itch_detail::read_be64(p + 11);
     oep.executed_shares = itch_detail::read_be32(p + 19);
     oep.match_number = itch_detail::read_be64(p + 23);
-    oep.printable = p[31];
+    oep.printable = static_cast<char>(p[31]);
     oep.execution_price = itch_detail::read_be32(p + 32);
     return oep;
 }
