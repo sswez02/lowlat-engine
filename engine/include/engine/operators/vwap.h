@@ -11,6 +11,13 @@ namespace engine {
 
 __extension__ using int128_t = __int128;
 
+/**
+ * @brief Volume-Weighted Average Price (VWAP) Operator.
+ * * Computes the continuous volume-weighted average price from a stream of events.
+ * * @note Utilizes a 128-bit integer for the price-volume accumulator (`sum_pv_`)
+ * to prevent arithmetic overflow during extended market data sessions.
+ * Ticks with zero or negative volume are safely ignored to prevent division errors.
+ */
 class VWAPOperator final : public Operator {
   public:
     void process(const Event &event) override {
