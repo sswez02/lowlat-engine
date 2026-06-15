@@ -4,6 +4,7 @@ add_executable(engine_bench
     bench_pipeline.cpp
     bench_vwap.cpp
     bench_itch_file.cpp
+    bench_sma.cpp
 )
 
 target_link_libraries(engine_bench
