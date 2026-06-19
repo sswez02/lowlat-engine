@@ -4,6 +4,8 @@ add_executable(engine_tests
     test_pipeline.cpp
     test_vwap.cpp
     test_itch_source.cpp
+    test_sma.cpp
+    test_rms.cpp
 )
 
 target_link_libraries(engine_tests
