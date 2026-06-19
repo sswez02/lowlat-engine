@@ -104,7 +104,7 @@ static void BM_DirectCallVariantPolymorphic(benchmark::State &state) {
         },
         engine::AudioSample{
             .timestamp = 2,
-            .amplitude = 7,
+            .amplitude = 7.0F,
         },
         engine::IMUSample{
             .timestamp = 3,

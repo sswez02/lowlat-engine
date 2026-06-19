@@ -129,7 +129,7 @@ TEST(Sma, SMAIgnoresNonTickEvents) {
 
     smaop.process(engine::AudioSample{
         .timestamp = 1U,
-        .amplitude = 7,
+        .amplitude = 7.0F,
     });
 
     smaop.process(engine::IMUSample{

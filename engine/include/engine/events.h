@@ -14,7 +14,7 @@ struct TickEvent {
 
 struct AudioSample {
     uint64_t timestamp{};
-    int16_t amplitude{};
+    float amplitude{};
 };
 
 struct IMUSample {

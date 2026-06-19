@@ -33,7 +33,7 @@ TEST(Operator, NoOpStoresAudioSample) {
 
     op.process(engine::AudioSample{
         .timestamp = 2U,
-        .amplitude = 7,
+        .amplitude = 7.0F,
     });
 
     EXPECT_TRUE(std::holds_alternative<engine::AudioSample>(op.last_event()));
@@ -41,7 +41,7 @@ TEST(Operator, NoOpStoresAudioSample) {
     const auto *stored_audio = std::get_if<engine::AudioSample>(&op.last_event());
     ASSERT_NE(stored_audio, nullptr);
     EXPECT_EQ(stored_audio->timestamp, 2U);
-    EXPECT_EQ(stored_audio->amplitude, 7);
+    EXPECT_EQ(stored_audio->amplitude, 7.0F);
 }
 
 TEST(Operator, NoOpStoresIMUSample) {
@@ -85,7 +85,7 @@ TEST(Operator, NoOpStoresMostRecentEvent) {
 
     op.process(engine::AudioSample{
         .timestamp = 2U,
-        .amplitude = 7,
+        .amplitude = 7.0F,
     });
 
     EXPECT_TRUE(std::holds_alternative<engine::AudioSample>(op.last_event()));
@@ -93,7 +93,7 @@ TEST(Operator, NoOpStoresMostRecentEvent) {
     const auto *stored_audio = std::get_if<engine::AudioSample>(&op.last_event());
     ASSERT_NE(stored_audio, nullptr);
     EXPECT_EQ(stored_audio->timestamp, 2U);
-    EXPECT_EQ(stored_audio->amplitude, 7);
+    EXPECT_EQ(stored_audio->amplitude, 7.0F);
 }
 
 // IncrementOperator counts Events by alternative
@@ -126,7 +126,7 @@ TEST(Operator, IncrementOperatorCountsAudioSample) {
 
     op.process(engine::AudioSample{
         .timestamp = 2U,
-        .amplitude = 7,
+        .amplitude = 7.0F,
     });
 
     EXPECT_EQ(op.tick_count(), 0U);
@@ -170,7 +170,7 @@ TEST(Operator, IncrementOperatorCountsMixedSequence) {
 
     op.process(engine::AudioSample{
         .timestamp = 2U,
-        .amplitude = 7,
+        .amplitude = 7.0F,
     });
 
     op.process(engine::IMUSample{

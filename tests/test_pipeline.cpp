@@ -20,7 +20,7 @@ TEST(Pipeline, EmptyPipelineDoesNotCrash) {
 
     EXPECT_NO_THROW(pipeline.process(engine::AudioSample{
         .timestamp = 2U,
-        .amplitude = 7,
+        .amplitude = 7.0F,
     }));
 
     EXPECT_NO_THROW(pipeline.process(engine::IMUSample{
@@ -125,7 +125,7 @@ TEST(Pipeline, HeterogeneousOperators) {
 
     pipeline.process(engine::AudioSample{
         .timestamp = 2U,
-        .amplitude = 7,
+        .amplitude = 7.0F,
     });
 
     pipeline.process(engine::IMUSample{
@@ -166,7 +166,7 @@ TEST(Pipeline, PipelineProcessesAllEventTypes) {
 
     pipeline.process(engine::AudioSample{
         .timestamp = 2U,
-        .amplitude = 7,
+        .amplitude = 7.0F,
     });
 
     pipeline.process(engine::IMUSample{
