@@ -38,12 +38,12 @@ class RMSOperator final : public Operator {
     void process(const Event &event) override {
         std::visit(overloaded{
                        [this](const AudioSample &sample) {
-                           const double old_sample = static_cast<double>(samples_[cursor_]);
+                           const auto old_sample = static_cast<double>(samples_[cursor_]);
                            sum_sq_ -= old_sample * old_sample;
 
                            samples_[cursor_] = sample.amplitude;
 
-                           const double new_sample = static_cast<double>(sample.amplitude);
+                           const auto new_sample = static_cast<double>(sample.amplitude);
                            sum_sq_ += new_sample * new_sample;
 
                            cursor_ = (cursor_ + 1) & (window_size_ - 1);
