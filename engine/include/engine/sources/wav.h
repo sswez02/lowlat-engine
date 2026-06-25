@@ -65,7 +65,11 @@ class WAVFileSource {
   public:
     explicit WAVFileSource(std::string path);
 
-    // Reads the WAV file, parses samples, pushes AudioSamples into the pipeline.
+    // Parses an in-memory WAV buffer and pushes AudioSamples into the pipeline.
+    // Returns the number of AudioSamples emitted.
+    std::size_t run_buffer(const std::uint8_t *data, std::size_t size, Pipeline &pipeline);
+
+    // Reads the WAV file from disk, then parses it through run_buffer.
     // Returns the number of AudioSamples emitted.
     std::size_t run(Pipeline &pipeline);
 
@@ -88,26 +92,13 @@ inline std::size_t WAVFileSource::samples_emitted() const noexcept {
     return samples_emitted_;
 }
 
-inline std::size_t WAVFileSource::run(Pipeline &pipeline) {
+inline std::size_t WAVFileSource::run_buffer(const std::uint8_t *data, std::size_t size,
+                                             Pipeline &pipeline) {
     samples_processed_ = 0;
     samples_emitted_ = 0;
 
-    // file reading/parsing
-    std::ifstream file(path_, std::ios::binary);
-    if (!file) {
-        throw std::runtime_error("failed to open WAV file");
-    }
-
-    file.seekg(0, std::ios::end);
-    const auto size = static_cast<std::size_t>(file.tellg());
     if (size < 12U) {
         throw std::runtime_error("not a WAV file: too small");
-    }
-
-    file.seekg(0, std::ios::beg);
-    std::vector<std::uint8_t> buffer(size);
-    if (!file.read(reinterpret_cast<char *>(buffer.data()), static_cast<std::streamsize>(size))) {
-        throw std::runtime_error("failed to read WAV file: " + path_);
     }
 
     // offset 0-3    "RIFF"     4 bytes
@@ -115,10 +106,10 @@ inline std::size_t WAVFileSource::run(Pipeline &pipeline) {
     // offset 8-11   "WAVE"     4 bytes
     // offset 12...  chunks start
 
-    if (!wav_detail::fourcc_equals(buffer.data(), "RIFF")) {
+    if (!wav_detail::fourcc_equals(data, "RIFF")) {
         throw std::runtime_error("not a RIFF file");
     }
-    if (!wav_detail::fourcc_equals(buffer.data() + 8U, "WAVE")) {
+    if (!wav_detail::fourcc_equals(data + 8U, "WAVE")) {
         throw std::runtime_error("not a WAVE file");
     }
 
@@ -138,12 +129,12 @@ inline std::size_t WAVFileSource::run(Pipeline &pipeline) {
     // offset 16-19   16           chunk payload size
     // offset 20-35   format info  payload
 
-    while (cursor + 8U <= buffer.size()) {
-        const auto *chunk = buffer.data() + cursor;
+    while (cursor + 8U <= size) {
+        const auto *chunk = data + cursor;
         const auto chunk_size = static_cast<std::size_t>(wav_detail::read_le32(chunk + 4U));
         const auto payload_offset = cursor + 8U;
 
-        if (payload_offset + chunk_size > buffer.size()) {
+        if (payload_offset + chunk_size > size) {
             throw std::runtime_error("invalid WAV file: chunk extends past end of file");
         }
 
@@ -152,7 +143,7 @@ inline std::size_t WAVFileSource::run(Pipeline &pipeline) {
                 throw std::runtime_error("invalid WAV file: fmt chunk too small");
             }
 
-            format = parse_wav_format(buffer.data() + payload_offset);
+            format = parse_wav_format(data + payload_offset);
             found_fmt = true;
 
         } else if (wav_detail::fourcc_equals(chunk, "data")) {
@@ -204,8 +195,7 @@ inline std::size_t WAVFileSource::run(Pipeline &pipeline) {
     while (cursor + 2U <= data_end) {
         // C++20 defines conversion from uint16_t to int16_t modulo 2^16,
         // so PCM values with the high bit set become negative samples.
-        const auto raw_sample =
-            static_cast<std::int16_t>(wav_detail::read_le16(buffer.data() + cursor));
+        const auto raw_sample = static_cast<std::int16_t>(wav_detail::read_le16(data + cursor));
 
         // Convert signed 16-bit PCM to float32 -1.0, 1.0.
         const auto amplitude = static_cast<float>(raw_sample) / 32768.0F;
@@ -224,4 +214,22 @@ inline std::size_t WAVFileSource::run(Pipeline &pipeline) {
     return samples_emitted_;
 }
 
+inline std::size_t WAVFileSource::run(Pipeline &pipeline) {
+    // file reading/parsing
+    std::ifstream file(path_, std::ios::binary);
+    if (!file) {
+        throw std::runtime_error("failed to open WAV file");
+    }
+
+    file.seekg(0, std::ios::end);
+    const auto size = static_cast<std::size_t>(file.tellg());
+
+    file.seekg(0, std::ios::beg);
+    std::vector<std::uint8_t> buffer(size);
+    if (!file.read(reinterpret_cast<char *>(buffer.data()), static_cast<std::streamsize>(size))) {
+        throw std::runtime_error("failed to read WAV file: " + path_);
+    }
+
+    return run_buffer(buffer.data(), buffer.size(), pipeline);
+}
 } // namespace engine
