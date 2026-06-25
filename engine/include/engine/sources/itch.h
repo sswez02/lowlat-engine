@@ -77,7 +77,11 @@ class ITCHFileSource {
   public:
     explicit ITCHFileSource(std::string path);
 
-    // Reads the ITCH file, parses messages, pushes TickEvents into the pipeline.
+    // Parses an in-memory ITCH buffer and pushes trades as TickEvents into the pipeline.
+    // Returns the number of TickEvents emitted.
+    std::size_t run_buffer(const std::uint8_t *data, std::size_t size, Pipeline &pipeline);
+
+    // Reads the ITCH file from disk, then parses it through run_buffer.
     // Returns the number of TickEvents emitted.
     std::size_t run(Pipeline &pipeline);
 
@@ -100,38 +104,25 @@ inline std::size_t ITCHFileSource::ticks_emitted() const noexcept {
     return ticks_emitted_;
 }
 
-inline std::size_t ITCHFileSource::run(Pipeline &pipeline) {
+inline std::size_t ITCHFileSource::run_buffer(const std::uint8_t *data, std::size_t size,
+                                              Pipeline &pipeline) {
     messages_processed_ = 0;
     ticks_emitted_ = 0;
 
-    // file reading/parsing
-    std::ifstream file(path_, std::ios::binary);
-    if (!file) {
-        throw std::runtime_error("failed to open ITCH file");
-    }
-
-    file.seekg(0, std::ios::end);
-    const auto size = static_cast<std::size_t>(file.tellg());
-
-    file.seekg(0, std::ios::beg);
-    std::vector<uint8_t> buffer(size);
-    if (!file.read(reinterpret_cast<char *>(buffer.data()), static_cast<std::streamsize>(size))) {
-        throw std::runtime_error("failed to read ITCH file: " + path_);
-    }
     std::size_t cursor = 0;
 
-    while (cursor + 2 <= buffer.size()) {
+    while (cursor + 2 <= size) {
         // First 2 bytes of the message input is the message length.
-        const uint16_t message_length = itch_detail::read_be16(buffer.data() + cursor);
+        const uint16_t message_length = itch_detail::read_be16(data + cursor);
         if (message_length == 0) {
             break;
         }
         cursor += 2;
 
-        if (cursor + message_length > buffer.size()) {
+        if (cursor + message_length > size) {
             break; // not enough bytes for full body
         }
-        const uint8_t *body = buffer.data() + cursor;
+        const uint8_t *body = data + cursor;
 
         // First byte of the message body is the ITCH message type.
         const char message_type = static_cast<char>(body[0]);
@@ -155,6 +146,25 @@ inline std::size_t ITCHFileSource::run(Pipeline &pipeline) {
         cursor += message_length;
     }
     return ticks_emitted_;
+}
+
+inline std::size_t ITCHFileSource::run(Pipeline &pipeline) {
+    // Read the file into memory, then reuse the buffer parser.
+    std::ifstream file(path_, std::ios::binary);
+    if (!file) {
+        throw std::runtime_error("failed to open ITCH file");
+    }
+
+    file.seekg(0, std::ios::end);
+    const auto size = static_cast<std::size_t>(file.tellg());
+
+    file.seekg(0, std::ios::beg);
+    std::vector<std::uint8_t> buffer(size);
+    if (!file.read(reinterpret_cast<char *>(buffer.data()), static_cast<std::streamsize>(size))) {
+        throw std::runtime_error("failed to read ITCH file: " + path_);
+    }
+
+    return run_buffer(buffer.data(), buffer.size(), pipeline);
 }
 
 } // namespace engine
