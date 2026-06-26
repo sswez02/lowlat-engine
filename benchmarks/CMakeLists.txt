@@ -6,6 +6,7 @@ add_executable(engine_bench
     bench_itch_file.cpp
     bench_sma.cpp
     bench_rms.cpp
+    bench_threading.cpp
 )
 
 target_link_libraries(engine_bench
