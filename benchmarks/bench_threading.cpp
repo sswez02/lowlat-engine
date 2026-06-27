@@ -150,6 +150,66 @@ class ThreadingBench : public benchmark::Fixture {
     std::string setup_error_;
 };
 
+BENCHMARK_DEFINE_F(ThreadingBench, OnePipelineITCH)(benchmark::State &state) {
+    if (!setup_error_.empty()) {
+        state.SkipWithError(setup_error_.c_str());
+        return;
+    }
+
+    std::int64_t items_per_iteration = 0;
+
+    for ([[maybe_unused]] auto _ : state) {
+        engine::Pipeline itch_pipeline;
+
+        auto vwap = std::make_unique<engine::VWAPOperator>();
+        itch_pipeline.add(std::move(vwap));
+
+        engine::ITCHFileSource itch_source{""};
+
+        itch_source.run_buffer(itch_buffer_.data(), itch_buffer_.size(), itch_pipeline);
+        const auto itch_messages = itch_source.messages_processed();
+
+        if (itch_messages == 0U) {
+            state.SkipWithError("ITCH pipeline processed zero messages");
+            return;
+        }
+
+        items_per_iteration = static_cast<std::int64_t>(itch_messages);
+    }
+
+    state.SetItemsProcessed(state.iterations() * items_per_iteration);
+}
+
+BENCHMARK_DEFINE_F(ThreadingBench, OnePipelineWAV)(benchmark::State &state) {
+    if (!setup_error_.empty()) {
+        state.SkipWithError(setup_error_.c_str());
+        return;
+    }
+
+    std::int64_t items_per_iteration = 0;
+
+    for ([[maybe_unused]] auto _ : state) {
+        engine::Pipeline wav_pipeline;
+
+        auto rms = std::make_unique<engine::RMSOperator>(1024U);
+        wav_pipeline.add(std::move(rms));
+
+        engine::WAVFileSource wav_source{""};
+
+        wav_source.run_buffer(wav_buffer_.data(), wav_buffer_.size(), wav_pipeline);
+        const auto wav_samples = wav_source.samples_processed();
+
+        if (wav_samples == 0U) {
+            state.SkipWithError("WAV pipeline processed zero samples");
+            return;
+        }
+
+        items_per_iteration = static_cast<std::int64_t>(wav_samples);
+    }
+
+    state.SetItemsProcessed(state.iterations() * items_per_iteration);
+}
+
 BENCHMARK_DEFINE_F(ThreadingBench, TwoPipelinesSequential)(benchmark::State &state) {
     if (!setup_error_.empty()) {
         state.SkipWithError(setup_error_.c_str());
@@ -240,6 +300,10 @@ BENCHMARK_DEFINE_F(ThreadingBench, TwoPipelinesParallel)(benchmark::State &state
 
     state.SetItemsProcessed(state.iterations() * items_per_iteration);
 }
+
+BENCHMARK_REGISTER_F(ThreadingBench, OnePipelineITCH)->Unit(benchmark::kMillisecond)->UseRealTime();
+
+BENCHMARK_REGISTER_F(ThreadingBench, OnePipelineWAV)->Unit(benchmark::kMillisecond)->UseRealTime();
 
 BENCHMARK_REGISTER_F(ThreadingBench, TwoPipelinesSequential)
     ->Unit(benchmark::kMillisecond)
